@@ -34,17 +34,15 @@
   raw: "sudo pip install paramiko PyYAML jinja2 httplib2 docker-py virtualenv pycrypto"
   when: task_ready_ran|failed
 
-- name: Upgrade pip
-  shell: "easy_install -U pip"
-  sudo: yes
-
-- name: Touch lock file
-  file: path=/var/lock/ansible-node.task state=touch
-
 - name: Install ansible accelerate mode requirements
   pip: state=present name="python-keyczar" extra_args="--pre"
   sudo: yes
+  when: task_ready_ran|failed
 
 - name: Open ansible accelerate mode port
   ufw: state=enabled rule=allow port=5099
   sudo: yes
+  when: task_ready_ran|failed
+
+- name: Touch lock file
+  file: path=/var/lock/ansible-node.task state=touch
