@@ -1,0 +1,46 @@
+---
+- name: See if this task has already been run once
+  command: /bin/false creates=/var/lock/ansible-node.task
+  register: task_ready_ran
+  ignore_errors: yes
+
+- name: Install ansible dependencies for clients
+  apt:  update_cache=yes pkg="{{item}}"
+  with_items:
+  - python-pycurl 
+  - python-dev 
+  - python 
+  - python-pip 
+  - python-apt 
+  - openssh-server
+  - git 
+  - tar 
+  - unzip 
+  - ufw
+  sudo: yes
+  when: task_ready_ran|failed
+
+- name: Add backports to apt sources
+  apt_repository: state=present repo='deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-backports main restricted universe multiverse'
+  sudo: yes
+  when: ansible_distribution_release is defined and task_ready_ran|failed
+
+- name: Add backports src to apt sources
+  apt_repository: state=present repo='deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-backports main restricted universe multiverse'
+  sudo: yes
+  when: ansible_distribution_release is defined and task_ready_ran|failed
+
+- name: Install required pip packages
+  raw: "sudo pip install paramiko PyYAML jinja2 httplib2 docker-py virtualenv pycrypto"
+  when: task_ready_ran|failed
+
+- name: Touch lock file
+  file: path=/var/lock/ansible-node.task state=touch
+
+- name: Install ansible accelerate mode requirements
+  pip: state=present name="python-keyczar" extra_args="--pre"
+  sudo: yes
+
+- name: Open ansible accelerate mode port
+  ufw: state=enabled rule=allow port=5099
+  sudo: yes

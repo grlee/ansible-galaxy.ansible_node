@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: George Lee
+  description: Sets up dependencies for ansible nodes
+  company:
+  license: BSD
+  min_ansible_version: 1.4
+  platforms:
+  - name: Ubuntu
+    versions:
+    - saucy
+    - trusty
+  categories:
+  - system
+dependencies: []
