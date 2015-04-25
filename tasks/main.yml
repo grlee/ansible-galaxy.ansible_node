@@ -34,6 +34,10 @@
   raw: "sudo pip install paramiko PyYAML jinja2 httplib2 docker-py virtualenv pycrypto"
   when: task_ready_ran|failed
 
+- name: Upgrade pip
+  shell: "easy_install -U pip"
+  sudo: yes
+
 - name: Touch lock file
   file: path=/var/lock/ansible-node.task state=touch
 
